@@ -16,19 +16,9 @@ import java.nio.file.Paths;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        if(args.length == 0) {
-            System.err.println("Should provide the path to the source code");
-            System.exit(1);
-        }
-
-        File file = new File(args[0]);
-        if(!file.exists() || !file.isDirectory() || !file.canRead()) {
-            System.err.println("Provide a path to an existing readable directory");
-            System.exit(2);
-        }
-
-        SourceRoot root = new SourceRoot(file.toPath());
-        PublicElementsPrinter printer = new PublicElementsPrinter();
+        SourceRoot root = new SourceRoot(Paths.get("C:/Users/alexl/Documents/FAC/M2/VV/VV-ISTIC-TP2/code/Exercise4"));
+        //PublicElementsPrinter printer = new PublicElementsPrinter();
+        PublicPrivateVariableNoGetter printer = new PublicPrivateVariableNoGetter();
         root.parse("", (localPath, absolutePath, result) -> {
             result.ifSuccessful(unit -> unit.accept(printer, null));
             return SourceRoot.Callback.Result.DONT_SAVE;

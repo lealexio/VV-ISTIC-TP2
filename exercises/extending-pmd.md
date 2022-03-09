@@ -23,3 +23,28 @@ Use your rule with different projects and describe you findings below. See the [
 
 ## Answer
 
+Target rule [here](https://pmd.github.io/pmd-6.43.0/pmd_rules_java_design.html#avoiddeeplynestedifstmts)
+
+If found AvoidDeeplyNestedIfStmts error in many projects.
+
+Example (Deeply nested if..then statements are hard to read) :
+```
+public static <K> Boolean getBoolean(final Map<? super K, ?> map, final K key) {
+    if (map != null) {
+        final Object answer = map.get(key);
+        if (answer != null) {
+            if (answer instanceof Boolean) {
+                return (Boolean) answer;
+            }
+            if (answer instanceof String) {
+                return Boolean.valueOf((String) answer);
+            }
+            if (answer instanceof Number) {
+                final Number n = (Number) answer;
+                return n.intValue() != 0 ? Boolean.TRUE : Boolean.FALSE;
+            }
+        }
+    }
+    return null;
+}
+```
