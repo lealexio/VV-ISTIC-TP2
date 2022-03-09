@@ -60,16 +60,23 @@ public class PublicPrivateVariableNoGetter extends VoidVisitorWithDefaults<Void>
     public void visit(MethodDeclaration declaration, Void arg) {
         //if(!declaration.isPublic()) return;
 
-//        if(declaration.getBody().ifPresent(
-//                body -> body.ifReturnStmt( rstmt ->
-//                        privateFields.removeIf()rstmt.)
-//        )
-//        );
-        if(declaration.isPublic()){
-            privateFields.removeIf(pfield ->  declaration.getNameAsString().replace("get", "").equalsIgnoreCase(pfield.getName().asString()));
+        if(declaration.isPublic()) {
+            declaration.getBody().ifPresent(body -> body.getStatements().forEach(stmt -> {
+                if (stmt.isReturnStmt()) {
+                    if (stmt.asReturnStmt().getExpression().isPresent()) {
+                        System.out.println("-" + stmt.asReturnStmt().getExpression().get());
+                        //System.out.println("--" + declaration.getNameAsString().toLowerCase().replace("get", ""));
+                        privateFields.removeIf(pfield -> declaration.getNameAsString().toLowerCase().replace("get", "").equals(pfield.getName().asString()) && stmt.asReturnStmt().getExpression().get().toString().equals(pfield.getName().asString()));
+                        //System.out.println(stmt.asReturnStmt().getExpression().get().toString();
+                    }
+                }
+            }));
         }
 
 
+        //sif(declaration.isPublic()){
+         //   privateFields.removeIf(pfield ->  declaration.getNameAsString().replace("get", "").equalsIgnoreCase(pfield.getName().asString()));
+        //}
 
         //System.out.println("  " + declaration.getDeclarationAsString(true, true));
     }
