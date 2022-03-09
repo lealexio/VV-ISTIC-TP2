@@ -29,7 +29,6 @@ public class PublicPrivateVariableNoGetter extends VoidVisitorWithDefaults<Void>
             if (member instanceof TypeDeclaration)
                 member.accept(this, arg);
         }
-        System.out.println("Public getters are missing for private fields :" + privateFields);
     }
 
     @Override
@@ -64,21 +63,11 @@ public class PublicPrivateVariableNoGetter extends VoidVisitorWithDefaults<Void>
             declaration.getBody().ifPresent(body -> body.getStatements().forEach(stmt -> {
                 if (stmt.isReturnStmt()) {
                     if (stmt.asReturnStmt().getExpression().isPresent()) {
-                        System.out.println("-" + stmt.asReturnStmt().getExpression().get());
-                        //System.out.println("--" + declaration.getNameAsString().toLowerCase().replace("get", ""));
                         privateFields.removeIf(pfield -> declaration.getNameAsString().toLowerCase().replace("get", "").equals(pfield.getName().asString()) && stmt.asReturnStmt().getExpression().get().toString().equals(pfield.getName().asString()));
-                        //System.out.println(stmt.asReturnStmt().getExpression().get().toString();
                     }
                 }
             }));
         }
-
-
-        //sif(declaration.isPublic()){
-         //   privateFields.removeIf(pfield ->  declaration.getNameAsString().replace("get", "").equalsIgnoreCase(pfield.getName().asString()));
-        //}
-
-        //System.out.println("  " + declaration.getDeclarationAsString(true, true));
     }
 
 }

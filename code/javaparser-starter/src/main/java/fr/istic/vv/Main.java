@@ -21,6 +21,8 @@ public class Main {
         PublicPrivateVariableNoGetter printer = new PublicPrivateVariableNoGetter();
         root.parse("", (localPath, absolutePath, result) -> {
             result.ifSuccessful(unit -> unit.accept(printer, null));
+
+            System.out.println("Public getters are missing for private fields : " + printer.privateFields);
             return SourceRoot.Callback.Result.DONT_SAVE;
         });
     }
