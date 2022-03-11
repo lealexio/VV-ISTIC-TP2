@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.visitor.VoidVisitorWithDefaults;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -12,6 +13,9 @@ import java.util.List;
 public class PublicPrivateVariableNoGetter extends VoidVisitorWithDefaults<Void> {
 
     List<VariableDeclarator> privateFields = new ArrayList<>();
+
+    String packageName;
+    String className;
 
     public void visitTypeDeclaration(TypeDeclaration<?> declaration, Void arg) {
         //if(!declaration.isPrivate()) return;
@@ -33,6 +37,11 @@ public class PublicPrivateVariableNoGetter extends VoidVisitorWithDefaults<Void>
 
     @Override
     public void visit(CompilationUnit unit, Void arg) {
+        unit.getPackageDeclaration().ifPresentOrElse(
+                decl -> packageName=unit.getPackageDeclaration().get().getNameAsString(),
+                () -> packageName = "Undefined"
+        );
+
         for(TypeDeclaration<?> type : unit.getTypes()) {
             type.accept(this, null);
         }
@@ -40,6 +49,7 @@ public class PublicPrivateVariableNoGetter extends VoidVisitorWithDefaults<Void>
 
     @Override
     public void visit(ClassOrInterfaceDeclaration declaration, Void arg) {
+        className=declaration.getNameAsString();
         visitTypeDeclaration(declaration, arg);
     }
 
@@ -57,8 +67,6 @@ public class PublicPrivateVariableNoGetter extends VoidVisitorWithDefaults<Void>
 
     @Override
     public void visit(MethodDeclaration declaration, Void arg) {
-        //if(!declaration.isPublic()) return;
-
         if(declaration.isPublic()) {
             declaration.getBody().ifPresent(body -> body.getStatements().forEach(stmt -> {
                 if (stmt.isReturnStmt()) {
@@ -68,6 +76,10 @@ public class PublicPrivateVariableNoGetter extends VoidVisitorWithDefaults<Void>
                 }
             }));
         }
+    }
+
+    public void toCsv(){
+        System.out.println("Export to csv");
     }
 
 }
