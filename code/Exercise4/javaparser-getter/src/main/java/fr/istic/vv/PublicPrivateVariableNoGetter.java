@@ -80,19 +80,30 @@ public class PublicPrivateVariableNoGetter extends VoidVisitorWithDefaults<Void>
         }
     }
 
-    public void toCsv(String filePath) {
+    public void createCsv(String filePath){
         try {
             File csvFile = new File(filePath);
             if (csvFile.createNewFile()) {
                 System.out.println("File created: " + csvFile.getName());
             }
 
-            PrintWriter writer = new PrintWriter(csvFile.getAbsolutePath(), "UTF-8");
+            PrintWriter writer = new PrintWriter(csvFile, "UTF-8");
             // Columns name
             writer.println("Package,Class,Field");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    public void toCsv(String filePath) {
+        try {
+            File csvFile = new File(filePath);
+            PrintWriter writer = new PrintWriter(new FileOutputStream(csvFile, true));
+
+            // Columns name
             privateFields.forEach(field -> writer.println(packageName+","+className+".java,"+field));
             writer.close();
-            System.out.println("Export data to " + csvFile.getAbsolutePath());
 
         } catch (IOException e) {
             System.out.println("An error occurred.");
