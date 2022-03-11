@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        SourceRoot root = new SourceRoot(Paths.get(System.getProperty("user.dir")+"/code/Exercise4"));
+        SourceRoot root = new SourceRoot(Paths.get(System.getProperty("user.dir")+"/code/Exercise4/input"));
 
 //        if(args.length == 0) {
 //            System.err.println("Should provide the path to the source code");
@@ -33,7 +33,7 @@ public class Main {
         root.parse("", (localPath, absolutePath, result) -> {
             result.ifSuccessful(unit -> unit.accept(printer, null));
             printer.privateFields.forEach(field -> System.out.println("Public getter is missing for private field '" + field + "' in class '" + printer.className + ".java' of package '" + printer.packageName + "'"));
-            printer.toCsv();
+            printer.toCsv(System.getProperty("user.dir")+"/code/Exercise4/output/result.csv");
             return SourceRoot.Callback.Result.DONT_SAVE;
         });
     }

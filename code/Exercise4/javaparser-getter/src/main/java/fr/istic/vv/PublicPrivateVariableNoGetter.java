@@ -3,6 +3,8 @@ package fr.istic.vv;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.visitor.VoidVisitorWithDefaults;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,8 +80,24 @@ public class PublicPrivateVariableNoGetter extends VoidVisitorWithDefaults<Void>
         }
     }
 
-    public void toCsv(){
-        System.out.println("Export to csv");
+    public void toCsv(String filePath) {
+        try {
+            File csvFile = new File(filePath);
+            if (csvFile.createNewFile()) {
+                System.out.println("File created: " + csvFile.getName());
+            }
+
+            PrintWriter writer = new PrintWriter(csvFile.getAbsolutePath(), "UTF-8");
+            // Columns name
+            writer.println("Package,Class,Field");
+            privateFields.forEach(field -> writer.println(packageName+","+className+".java,"+field));
+            writer.close();
+            System.out.println("Export data to " + csvFile.getAbsolutePath());
+
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 
 }
