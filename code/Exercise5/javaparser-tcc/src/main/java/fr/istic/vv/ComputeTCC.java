@@ -75,12 +75,16 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
     @Override
     public void visit(MethodDeclaration declaration, Void arg) {
         List<NameExpr> nameExpr = new ArrayList<>();
-        declaration.getBody().ifPresent(body -> body.getStatements().forEach(stmt -> {
-            stmt.getChildNodes().forEach(node -> {
-                getFieldsFromNode(nameExpr, node);
-            });
-        }));
-        //System.out.println("\nFields " + nameExpr + " used in declaration \n"+declaration.toString());
+
+        if(!allFields.isEmpty()){
+            declaration.getBody().ifPresent(body -> body.getStatements().forEach(stmt -> {
+                stmt.getChildNodes().forEach(node -> {
+                    getFieldsFromNode(nameExpr, node);
+                });
+            }));
+            //System.out.println("\nFields " + nameExpr + " used in declaration \n"+declaration.toString());
+        }
+
         fieldsByMethod.put(declaration, nameExpr);
     }
 
@@ -91,11 +95,7 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
      */
     public void getFieldsFromNode(List<NameExpr> nameExprNodes, Node node){
         // If a node is a closed leaflet, thus a NameExpr
-
-        if(allFields.isEmpty()){
-            return;
-        }
-        else if(node instanceof NameExpr ){
+        if(node instanceof NameExpr ){
             allFields.forEach(f -> {
                 // If current expression name if a field of the current class
                 if(f.getName().equals(((NameExpr) node).getName())){
@@ -127,41 +127,31 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
     }
 
     public int getDirectPairs(){
-        int directLinks = 0;
 
-        List<List<MethodDeclaration>> doubles = new ArrayList<>();
+        List<List<MethodDeclaration>> directPairs = new ArrayList<>();
         // Couple creation
         fieldsByMethod.forEach((methodDeclaration, nameExprs) -> {
             fieldsByMethod.forEach((methodDeclaration1, nameExprs1) -> {
                 // If methods are not same
                 if(!methodDeclaration.equals(methodDeclaration1)){
-                    // Temp couple
-                    List<MethodDeclaration> tmp_couple = new ArrayList<>(Arrays.asList(methodDeclaration, methodDeclaration1));
 
                     // Check if couple already exists
                     boolean exists = false;
-                    for(List<MethodDeclaration> d : doubles){
-                        if(d.containsAll(tmp_couple)){
+                    for(List<MethodDeclaration> d : directPairs){
+                        if(d.contains(methodDeclaration) && d.contains(methodDeclaration1)){
                             exists=true;
                             break;
                         }
                     }
-                    if(!exists){
-                        doubles.add(tmp_couple);
+                    if(!exists && !Collections.disjoint(fieldsByMethod.get(methodDeclaration), fieldsByMethod.get(methodDeclaration1))){
+                        directPairs.add(new ArrayList<>(Arrays.asList(methodDeclaration, methodDeclaration1)));
                     }
 
                 }
                 //System.out.println(methodDeclaration+"and"+methodDeclaration1);
             });
         });
-        // Foreach couple, if there is union between used fields, add one direct link
-        for(List<MethodDeclaration> d : doubles){
-            if(!Collections.disjoint(fieldsByMethod.get(d.get(0)), fieldsByMethod.get(d.get(1)))){
-                directLinks++;
-            }
-        }
-
-        return directLinks;
+        return directPairs.size();
     }
 
     public int getPairs(){
