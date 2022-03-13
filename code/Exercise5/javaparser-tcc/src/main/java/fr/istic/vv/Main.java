@@ -47,7 +47,7 @@ public class Main {
             System.out.println("Save in default csv : " + outputFile.getAbsolutePath());
         }
 
-        PublicPrivateVariableTCC printer = new PublicPrivateVariableTCC();
+        ComputeTCC printer = new ComputeTCC();
 
         printer.createCsv(outputFile);
 

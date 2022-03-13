@@ -10,7 +10,7 @@ import java.util.*;
 
 // This class visits a compilation unit and
 // prints all public enum, classes or interfaces along with their public methods
-public class PublicPrivateVariableTCC extends VoidVisitorWithDefaults<Void> {
+public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
 
     List<VariableDeclarator> privateFields = new ArrayList<>();
     List<VariableDeclarator> publicFields = new ArrayList<>();
