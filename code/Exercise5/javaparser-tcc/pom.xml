@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>fr.istic.vv</groupId>
-    <artifactId>javaparser-getter</artifactId>
+    <artifactId>javaparser-tcc</artifactId>
     <version>1.0</version>
 
     <properties>
