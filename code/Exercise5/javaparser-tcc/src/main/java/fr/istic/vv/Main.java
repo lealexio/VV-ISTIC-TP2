@@ -1,21 +1,12 @@
 package fr.istic.vv;
 
-import com.github.javaparser.Problem;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.visitor.VoidVisitor;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.utils.SourceRoot;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 public class Main {
 
@@ -32,6 +23,8 @@ public class Main {
             System.err.println("Provide a path to an existing readable directory");
             System.exit(2);
         }
+
+        //File inputFile = new File("C:\\Users\\Leloup\\Documents\\FAC\\M2\\VV\\VV-ISTIC-TP2\\code\\input\\point");
         SourceRoot root = new SourceRoot(inputFile.toPath());
 
         // Output File
@@ -50,11 +43,11 @@ public class Main {
         else{
             DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy_hh'h'mm'm'ss's'");
             String strDate = dateFormat.format(Calendar.getInstance().getTime());
-            outputFile = new File(System.getProperty("user.dir")+"/code/Exercise4/output/output_"+strDate+".csv");
+            outputFile = new File(System.getProperty("user.dir")+"/code/Exercise5/output/output_"+strDate+".csv");
             System.out.println("Save in default csv : " + outputFile.getAbsolutePath());
         }
 
-        PublicPrivateVariableNoGetter printer = new PublicPrivateVariableNoGetter();
+        PublicPrivateVariableTCC printer = new PublicPrivateVariableTCC();
 
         printer.createCsv(outputFile);
 
