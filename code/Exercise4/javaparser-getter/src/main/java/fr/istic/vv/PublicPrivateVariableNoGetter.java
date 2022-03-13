@@ -3,10 +3,8 @@ package fr.istic.vv;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.visitor.VoidVisitorWithDefaults;
-
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -21,7 +19,7 @@ public class PublicPrivateVariableNoGetter extends VoidVisitorWithDefaults<Void>
 
     public void visitTypeDeclaration(TypeDeclaration<?> declaration, Void arg) {
         //if(!declaration.isPrivate()) return;
-        System.out.println(declaration.getFullyQualifiedName().orElse("[Anonymous]"));
+        //System.out.println(declaration.getFullyQualifiedName().orElse("[Anonymous]"));
 
         for(FieldDeclaration field : declaration.getFields()) {
             field.accept(this, arg);
@@ -80,29 +78,28 @@ public class PublicPrivateVariableNoGetter extends VoidVisitorWithDefaults<Void>
         }
     }
 
-    public void createCsv(String filePath){
+    public void createCsv(File csvFile){
         try {
-            File csvFile = new File(filePath);
             if (csvFile.createNewFile()) {
-                System.out.println("File created: " + csvFile.getName());
+                System.out.println("File created : " + csvFile.getAbsolutePath());
             }
-
             PrintWriter writer = new PrintWriter(csvFile, "UTF-8");
-            // Columns name
+
+            // Columns names
             writer.println("Package,Class,Field");
+
         } catch (IOException e) {
-            System.out.println("An error occurred.");
+            System.out.println("An error occurred");
             e.printStackTrace();
         }
     }
 
-    public void toCsv(String filePath) {
+    public void toCsv(File csvFile) {
         try {
-            File csvFile = new File(filePath);
             PrintWriter writer = new PrintWriter(new FileOutputStream(csvFile, true));
 
             // Columns name
-            privateFields.forEach(field -> writer.println(packageName+","+className+".java,"+field));
+            privateFields.forEach(field -> writer.println(packageName+","+className+".java,"+field.getNameAsString()));
             writer.close();
 
         } catch (IOException e) {
