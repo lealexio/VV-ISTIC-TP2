@@ -5,8 +5,16 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorWithDefaults;
+import guru.nidi.graphviz.attribute.*;
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.model.Graph;
+
 import java.io.*;
 import java.util.*;
+
+import static guru.nidi.graphviz.attribute.Rank.RankDir.LEFT_TO_RIGHT;
+import static guru.nidi.graphviz.model.Factory.*;
 
 // This class visits a compilation unit and
 // prints all public enum, classes or interfaces along with their public methods
@@ -16,6 +24,7 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
     List<VariableDeclarator> publicFields = new ArrayList<>();
     List<VariableDeclarator> allFields = new ArrayList<>();
     Map<MethodDeclaration, Set<NameExpr>> fieldsByMethod = new HashMap<>();
+    List<List<MethodDeclaration>> directPairs = new ArrayList<>();
 
     String packageName;
     String className;
@@ -26,6 +35,7 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
         publicFields = new ArrayList<>();
         allFields = new ArrayList<>();
         fieldsByMethod = new HashMap<>();
+        directPairs = new ArrayList<>();
         System.out.println(declaration.getFullyQualifiedName().orElse("[Anonymous]"));
 
         for(FieldDeclaration field : declaration.getFields()) {
@@ -40,6 +50,8 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
             if (member instanceof TypeDeclaration)
                 member.accept(this, arg);
         }
+        this.computeDirectPairs();
+
     }
 
     @Override
@@ -85,7 +97,7 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
             if(declaration.getBody().isPresent()){
                 nameExpr.addAll(declaration.getBody().get().findAll(NameExpr.class));
             }
-            System.out.println("\nFields " + nameExpr + " used in declaration \n"+declaration.toString());
+            //System.out.println("\nFields " + nameExpr + " used in declaration \n"+declaration.toString());
         }
 
         fieldsByMethod.put(declaration, nameExpr);
@@ -98,12 +110,10 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
         else{
             return (float)getDirectPairs() / (float)getPairs();
         }
-
     }
 
-    public int getDirectPairs(){
-
-        List<List<MethodDeclaration>> directPairs = new ArrayList<>();
+    public void computeDirectPairs(){
+        this.directPairs = new ArrayList<>();
         // Couple creation
         fieldsByMethod.forEach((methodDeclaration, nameExprs) -> {
             fieldsByMethod.forEach((methodDeclaration1, nameExprs1) -> {
@@ -112,20 +122,23 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
 
                     // Check if couple already exists
                     boolean exists = false;
-                    for(List<MethodDeclaration> d : directPairs){
+                    for(List<MethodDeclaration> d : this.directPairs){
                         if(d.contains(methodDeclaration) && d.contains(methodDeclaration1)){
                             exists=true;
                             break;
                         }
                     }
                     if(!exists && !Collections.disjoint(fieldsByMethod.get(methodDeclaration), fieldsByMethod.get(methodDeclaration1))){
-                        directPairs.add(new ArrayList<>(Arrays.asList(methodDeclaration, methodDeclaration1)));
+                        this.directPairs.add(new ArrayList<>(Arrays.asList(methodDeclaration, methodDeclaration1)));
                     }
 
                 }
             });
         });
-        return directPairs.size();
+    }
+
+    public int getDirectPairs(){
+        return this.directPairs.size();
     }
 
     public int getPairs(){
@@ -164,6 +177,25 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
+    }
+
+    public void toGraph(){
+
+        List<guru.nidi.graphviz.model.Node> nodes = new ArrayList<>();
+        directPairs.forEach(pair -> {
+            nodes.add(node(pair.get(0).getNameAsString()).link(node(pair.get(1).getNameAsString())));
+        });
+
+        guru.nidi.graphviz.model.Node[] nodesArray = new guru.nidi.graphviz.model.Node[directPairs.size()];
+        nodes.toArray(nodesArray);
+
+        Graph g = graph("").with(nodesArray);
+        try{
+            Graphviz.fromGraph(g).height(1000).render(Format.PNG).toFile(new File("C:\\Users\\alexl\\Documents\\FAC\\M2\\VV\\VV-ISTIC-TP2\\code\\Exercise5\\output\\ex1.png"));
+        }catch (IOException e){
+            System.out.println(className+".java");
+        }
+
     }
 
 }

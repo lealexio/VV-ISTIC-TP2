@@ -49,12 +49,13 @@ public class Main {
 
         ComputeTCC printer = new ComputeTCC();
 
-        printer.createCsv(outputFile);
+        //printer.createCsv(outputFile);
 
         root.parse("", (localPath, absolutePath, result) -> {
             result.ifSuccessful(unit -> unit.accept(printer, null));
             //printer.privateFields.forEach(field -> System.out.println("Public getter is missing for private field '" + field + "' in class '" + printer.className + ".java' of package '" + printer.packageName + "'"));
-            printer.toCsv(outputFile);
+            //printer.toCsv(outputFile);
+            printer.toGraph();
             return SourceRoot.Callback.Result.DONT_SAVE;
         });
     }
