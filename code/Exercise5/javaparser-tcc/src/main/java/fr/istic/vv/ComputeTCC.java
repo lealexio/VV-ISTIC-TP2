@@ -22,6 +22,10 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
 
     public void visitTypeDeclaration(TypeDeclaration<?> declaration, Void arg) {
         //if(!declaration.isPrivate()) return;
+        privateFields = new ArrayList<>();
+        publicFields = new ArrayList<>();
+        allFields = new ArrayList<>();
+        fieldsByMethod = new HashMap<>();
         System.out.println(declaration.getFullyQualifiedName().orElse("[Anonymous]"));
 
         for(FieldDeclaration field : declaration.getFields()) {
@@ -80,6 +84,7 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
             declaration.getBody().ifPresent(body -> body.getStatements().forEach(stmt -> {
                 stmt.getChildNodes().forEach(node -> {
                     getFieldsFromNode(nameExpr, node);
+                    node.findAll(NameExpr.class);
                 });
             }));
             //System.out.println("\nFields " + nameExpr + " used in declaration \n"+declaration.toString());
