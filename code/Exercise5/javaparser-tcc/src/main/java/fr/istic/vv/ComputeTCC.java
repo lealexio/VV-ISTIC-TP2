@@ -15,7 +15,7 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
     List<VariableDeclarator> privateFields = new ArrayList<>();
     List<VariableDeclarator> publicFields = new ArrayList<>();
     List<VariableDeclarator> allFields = new ArrayList<>();
-    Map<MethodDeclaration, List<NameExpr>> fieldsByMethod = new HashMap<>();
+    Map<MethodDeclaration, Set<NameExpr>> fieldsByMethod = new HashMap<>();
 
     String packageName;
     String className;
@@ -78,47 +78,17 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
 
     @Override
     public void visit(MethodDeclaration declaration, Void arg) {
-        List<NameExpr> nameExpr = new ArrayList<>();
+        Set<NameExpr> nameExpr = new HashSet<>();
 
         if(!allFields.isEmpty()){
-            declaration.getBody().ifPresent(body -> body.getStatements().forEach(stmt -> {
-                stmt.getChildNodes().forEach(node -> {
-                    getFieldsFromNode(nameExpr, node);
-                    node.findAll(NameExpr.class);
-                });
-            }));
-            //System.out.println("\nFields " + nameExpr + " used in declaration \n"+declaration.toString());
+
+            if(declaration.getBody().isPresent()){
+                nameExpr.addAll(declaration.getBody().get().findAll(NameExpr.class));
+            }
+            System.out.println("\nFields " + nameExpr + " used in declaration \n"+declaration.toString());
         }
 
         fieldsByMethod.put(declaration, nameExpr);
-    }
-
-    /**
-     * Add current class fields used in a node
-     * @param nameExprNodes list of nameExpr present in method declaration, which are fields of class
-     * @param node to explore
-     */
-    public void getFieldsFromNode(List<NameExpr> nameExprNodes, Node node){
-        // If a node is a closed leaflet, thus a NameExpr
-        if(node instanceof NameExpr ){
-            allFields.forEach(f -> {
-                // If current expression name if a field of the current class
-                if(f.getName().equals(((NameExpr) node).getName())){
-                    // Remove doublon
-                    if(!nameExprNodes.contains(node)){
-                        nameExprNodes.add((NameExpr) node);
-                        // Break foreach
-                        return;
-                    }
-                }
-            });
-        }
-        // Recursive loop
-        else{
-            for(Node child: node.getChildNodes()){
-                getFieldsFromNode(nameExprNodes, child);
-            }
-        }
     }
 
     public float getTCC(){
@@ -153,7 +123,6 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
                     }
 
                 }
-                //System.out.println(methodDeclaration+"and"+methodDeclaration1);
             });
         });
         return directPairs.size();
