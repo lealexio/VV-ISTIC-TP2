@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Scanner;
 
 public class Main {
 
@@ -24,38 +25,36 @@ public class Main {
             System.exit(2);
         }
 
-        //File inputFile = new File("C:\\Users\\Leloup\\Documents\\FAC\\M2\\VV\\VV-ISTIC-TP2\\code\\input\\point");
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Type 'yes' to save graphs");
+        String allowGraphs = scanner.next();
+
         SourceRoot root = new SourceRoot(inputFile.toPath());
 
-        // Output File
-        File outputFile;
-        if(args.length == 2){
-            outputFile = new File(args[1]);
-            if(outputFile.isDirectory()) {
-                System.err.println("Provide a path to a valid csv File");
-                System.exit(2);
-            }
-            else if(!outputFile.getName().endsWith(".csv")){
-                System.err.println("File format must be '.csv'");
-                System.exit(2);
-            }
-        }
-        else{
-            DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy_hh'h'mm'm'ss's'");
-            String strDate = dateFormat.format(Calendar.getInstance().getTime());
-            outputFile = new File(System.getProperty("user.dir")+"/code/Exercise5/output/output_"+strDate+".csv");
-            System.out.println("Save in default csv : " + outputFile.getAbsolutePath());
-        }
 
+        String strDate = new SimpleDateFormat("dd-MM-yy_hh'h'mm'm'ss's'").format(Calendar.getInstance().getTime());
+
+
+        File outputCsvDir = new File(System.getProperty("user.dir")+"/code/Exercise5/output/"+strDate);
+        File outputGraphDir = new File(outputCsvDir, "/graphs");
+
+        outputGraphDir.mkdirs();
+
+        // Output csv
+        File outputCsv = new File(outputCsvDir + "/output.csv");
+
+        // Output Graph
         ComputeTCC printer = new ComputeTCC();
+        // Create csv
+        printer.createCsv(outputCsv);
 
-        //printer.createCsv(outputFile);
-
+        // Execute parsing
         root.parse("", (localPath, absolutePath, result) -> {
             result.ifSuccessful(unit -> unit.accept(printer, null));
-            //printer.privateFields.forEach(field -> System.out.println("Public getter is missing for private field '" + field + "' in class '" + printer.className + ".java' of package '" + printer.packageName + "'"));
-            //printer.toCsv(outputFile);
-            printer.toGraph();
+            printer.toCsv(outputCsv);
+            if(allowGraphs.equals("yes")){
+                printer.toGraph(new File(outputGraphDir, printer.packageName+printer.className+".png"));
+            }
             return SourceRoot.Callback.Result.DONT_SAVE;
         });
     }

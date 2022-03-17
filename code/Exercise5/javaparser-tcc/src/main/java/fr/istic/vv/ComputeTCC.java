@@ -12,9 +12,11 @@ import guru.nidi.graphviz.model.Graph;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static guru.nidi.graphviz.attribute.Rank.RankDir.LEFT_TO_RIGHT;
 import static guru.nidi.graphviz.model.Factory.*;
+import static java.util.Collections.list;
 
 // This class visits a compilation unit and
 // prints all public enum, classes or interfaces along with their public methods
@@ -28,6 +30,8 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
 
     String packageName;
     String className;
+
+
 
     public void visitTypeDeclaration(TypeDeclaration<?> declaration, Void arg) {
         //if(!declaration.isPrivate()) return;
@@ -179,21 +183,42 @@ public class ComputeTCC extends VoidVisitorWithDefaults<Void> {
         }
     }
 
-    public void toGraph(){
+
+    public Set<NameExpr> intersect(Set<NameExpr> s1, Set<NameExpr> s2){
+        Set<NameExpr> rt = new HashSet<>();
+        if(s1.size()>s2.size()){
+            s2.forEach( item -> {
+                if(s1.contains(item)){
+                    rt.add(item);
+                }
+            });
+        }
+        else{
+            s1.forEach( item -> {
+                if(s2.contains(item)){
+                    rt.add(item);
+                }
+            });
+        }
+        return rt;
+    }
+
+    public void toGraph(File pngFile){
 
         List<guru.nidi.graphviz.model.Node> nodes = new ArrayList<>();
         directPairs.forEach(pair -> {
-            nodes.add(node(pair.get(0).getNameAsString()).link(node(pair.get(1).getNameAsString())));
+            nodes.add(node(pair.get(0).getNameAsString()).link(to(node(pair.get(1).getNameAsString())).with(Label.of(intersect(fieldsByMethod.get(pair.get(0)), fieldsByMethod.get(pair.get(1))).toString()))));
         });
 
         guru.nidi.graphviz.model.Node[] nodesArray = new guru.nidi.graphviz.model.Node[directPairs.size()];
         nodes.toArray(nodesArray);
 
         Graph g = graph("").with(nodesArray);
+
         try{
-            Graphviz.fromGraph(g).height(1000).render(Format.PNG).toFile(new File("C:\\Users\\alexl\\Documents\\FAC\\M2\\VV\\VV-ISTIC-TP2\\code\\Exercise5\\output\\ex1.png"));
+            Graphviz.fromGraph(g).height(1500).render(Format.PNG).toFile(pngFile);
         }catch (IOException e){
-            System.out.println(className+".java");
+            System.out.println("Cannot save graph to " + pngFile.getAbsolutePath());
         }
 
     }
