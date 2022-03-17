@@ -54,6 +54,7 @@ public class Main {
             System.out.println("Save in default csv : " + outputFile.getAbsolutePath());
         }
 
+        outputFile.mkdirs();
         PublicPrivateVariableNoGetter printer = new PublicPrivateVariableNoGetter();
 
         printer.createCsv(outputFile);
