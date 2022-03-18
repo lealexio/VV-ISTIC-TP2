@@ -1,3 +1,8 @@
+# Students
+**Alexis Leloup**
+
+**Simon Lecordier**
+
 # Validation and Verification: Practical Session #2
 
 The goal of this practical session is to use and implement static analysis tools to compute metrics such as Cyclomatic Complexity(CC) or Tight Class Cohesion (TCC).
